@@ -1,0 +1,6 @@
+{
+  "name": "DevOps Pipeline Master Suite",
+  "description": "Interactive documentation, pipeline simulator, configuration generator, and AI viva prep companion for the Automated Decoupled CI/CD Pipeline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

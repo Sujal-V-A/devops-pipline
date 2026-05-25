@@ -1,0 +1,41 @@
+---
+# Ansible Continuous Deployment Playbook for devops-pipeline-master-suite
+- name: Agentless CD Deployment to Production Instance
+  hosts: production_servers
+  become: yes
+  
+  vars:
+    container_name: "devops-pipeline-master-suite-runner"
+    docker_image: "student/devops-pipeline-master-suite:latest"
+    host_port: "80"
+    target_port: "3000"
+    db_endpoint: "managed-postgresql-rds.us-east-1.rds.amazonaws.com"
+    db_port: "5432"
+
+  tasks:
+    - name: Purge old application docker container instance if present
+      docker_container:
+        name: "{{ container_name }}"
+        state: absent
+
+    - name: Fetch fresh container layer from Docker Hub
+      docker_image:
+        name: "{{ docker_image }}"
+        source: pull
+        force_source: yes
+
+    - name: Spin up new stateless container running on Port {{ host_port }}
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ host_port }}:{{ target_port }}"
+        env:
+          DB_HOST: "{{ db_endpoint }}"
+          DB_PORT: "{{ db_port }}"
+          DB_USER: "vault_db_admin"
+          DB_PASSWORD: "secureVaultPassword99!"
+          DB_NAME: "prod_devops_master_schema"
+          APP_ENV: "production"
