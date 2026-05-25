@@ -25,16 +25,23 @@ pipeline {
         stage('Push to Central Hub Container Registry') {
             steps {
                 echo "Pushing immutable image to Docker Hub repository..."
-                sh 'echo "$DOCKER_HUB_CREDS_PSW" | docker login -u "$DOCKER_HUB_CREDS_USR" --password-stdin'
-                sh 'docker tag "${IMAGE_TAG}" "docker.io/${DOCKER_HUB_CREDS_USR}/devops-pipeline-master-suite:latest"'
-                sh 'docker push "docker.io/${DOCKER_HUB_CREDS_USR}/devops-pipeline-master-suite:latest"'
+                sh '''
+                    CLEAN_PSW=$(echo -n "$DOCKER_HUB_CREDS_PSW" | tr -d '\r\n')
+                    CLEAN_USR=$(echo -n "$DOCKER_HUB_CREDS_USR" | tr -d '\r\n')
+                    echo "$CLEAN_PSW" | docker login -u "$CLEAN_USR" --password-stdin
+                    docker tag "${IMAGE_TAG}" "docker.io/${CLEAN_USR}/devops-pipeline-master-suite:latest"
+                    docker push "docker.io/${CLEAN_USR}/devops-pipeline-master-suite:latest"
+                '''
             }
         }
         
         stage('Orchestrate Remote Deployment via Ansible') {
             steps {
                 echo "Running Ansible Playbooks agentlessly via containerized Ansible..."
-                sh 'docker run --rm -v $(pwd):/workspace -v ~/.ssh:/root/.ssh alpine/ansible ansible-playbook -i /workspace/ansible/hosts /workspace/ansible/deploy-playbook.yml --extra-vars "docker_image=docker.io/${DOCKER_HUB_CREDS_USR}/devops-pipeline-master-suite:latest"'
+                sh '''
+                    CLEAN_USR=$(echo -n "$DOCKER_HUB_CREDS_USR" | tr -d '\r\n')
+                    docker run --rm -v $(pwd):/workspace -v ~/.ssh:/root/.ssh alpine/ansible ansible-playbook -i /workspace/ansible/hosts /workspace/ansible/deploy-playbook.yml --extra-vars "docker_image=docker.io/${CLEAN_USR}/devops-pipeline-master-suite:latest"
+                '''
             }
         }
     }
