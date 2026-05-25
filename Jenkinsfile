@@ -32,7 +32,7 @@ pipeline {
         stage('Orchestrate Remote Deployment via Ansible') {
             steps {
                 echo "Running Ansible Playbooks agentlessly via containerized Ansible..."
-                sh 'docker run --rm -v $(pwd):/workspace -v ~/.ssh:/root/.ssh alpine/ansible ansible-playbook -i /workspace/ansible/hosts /workspace/ansible/deploy-playbook.yml --extra-vars "docker_image=docker.io/${DOCKER_HUB_CREDS_USR}/devops-pipeline-master-suite:latest"'
+                sh 'docker run --rm -v jenkins_home:/jenkins_home -v ~/.ssh:/root/.ssh alpine/ansible ansible-playbook -i /jenkins_home/workspace/devops-pipeline/ansible/hosts /jenkins_home/workspace/devops-pipeline/ansible/deploy-playbook.yml --extra-vars "docker_image=docker.io/${DOCKER_HUB_CREDS_USR}/devops-pipeline-master-suite:latest"'
             }
         }
     }
