@@ -13,6 +13,27 @@
     db_port: "5432"
 
   tasks:
+    - name: Install Docker on Amazon Linux
+      package:
+        name: docker
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install pip
+      package:
+        name: python3-pip
+        state: present
+
+    - name: Install Docker SDK for Python
+      pip:
+        name: docker
+        state: present
+
     - name: Purge old application docker container instance if present
       docker_container:
         name: "{{ container_name }}"
