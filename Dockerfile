@@ -1,5 +1,5 @@
 # Production Dockerfile for Node.js Express service
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN rm -f package-lock.json
