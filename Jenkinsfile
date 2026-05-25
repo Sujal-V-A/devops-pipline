@@ -8,12 +8,6 @@ pipeline {
     }
     
     stages {
-        stage('Repository Checkout') {
-            steps {
-                git branch: 'master', url: 'https://github.com/student/devops-pipeline-master-suite.git'
-            }
-        }
-        
         stage('Code Safety & Security Validation') {
             steps {
                 echo "Validating environment parameters..."
@@ -38,8 +32,8 @@ pipeline {
         
         stage('Orchestrate Remote Deployment via Ansible') {
             steps {
-                echo "Running Ansible Playbooks agentlessly over Port 22 SSH..."
-                sh "ansible-playbook -i ansible/hosts ansible/deploy-playbook.yml"
+                echo "Running Ansible Playbooks agentlessly via containerized Ansible..."
+                sh "docker run --rm -v \$(pwd):/workspace -v ~/.ssh:/root/.ssh alpine/ansible ansible-playbook -i /workspace/ansible/hosts /workspace/ansible/deploy-playbook.yml"
             }
         }
     }
