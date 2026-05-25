@@ -33,6 +33,7 @@
       pip:
         name: docker
         state: present
+        extra_args: "--ignore-installed"
 
     - name: Purge old application docker container instance if present
       docker_container:
