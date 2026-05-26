@@ -20,9 +20,36 @@ export default function TechExplorer() {
   const IconComponent = iconMap[selectedTool.iconName] || Server;
 
   const copyCode = (code: string, name: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCodeName(name);
-    setTimeout(() => setCopiedCodeName(null), 2000);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code)
+        .then(() => {
+          setCopiedCodeName(name);
+          setTimeout(() => setCopiedCodeName(null), 2000);
+        })
+        .catch(() => {
+          fallbackCopy(code, name);
+        });
+    } else {
+      fallbackCopy(code, name);
+    }
+  };
+
+  const fallbackCopy = (text: string, label: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-99999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      setCopiedCodeName(label);
+      setTimeout(() => setCopiedCodeName(null), 2000);
+    } catch (err) {
+      console.error("Fallback copy failed", err);
+    }
+    document.body.removeChild(textArea);
   };
 
   const getQuestionsForTool = (toolName: string) => {

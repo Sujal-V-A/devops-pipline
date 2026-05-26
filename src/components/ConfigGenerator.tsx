@@ -13,9 +13,36 @@ export default function ConfigGenerator() {
   const [copiedName, setCopiedName] = useState<string | null>(null);
 
   const copyCode = (code: string, tabName: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedName(tabName);
-    setTimeout(() => setCopiedName(null), 2000);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code)
+        .then(() => {
+          setCopiedName(tabName);
+          setTimeout(() => setCopiedName(null), 2000);
+        })
+        .catch(() => {
+          fallbackCopy(code, tabName);
+        });
+    } else {
+      fallbackCopy(code, tabName);
+    }
+  };
+
+  const fallbackCopy = (text: string, label: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-99999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      setCopiedName(label);
+      setTimeout(() => setCopiedName(null), 2000);
+    } catch (err) {
+      console.error("Fallback copy failed", err);
+    }
+    document.body.removeChild(textArea);
   };
 
   // Generate Dockerfile dynamically
@@ -329,7 +356,7 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'`;
               {copiedName === currentViewFile.name ? (
                 <>
                   <Check size={13} className="text-emerald-500" />
-                  <span className="text-emerald-500 font-semibold">Blank Copied</span>
+                  <span className="text-emerald-500 font-semibold">Copied</span>
                 </>
               ) : (
                 <>

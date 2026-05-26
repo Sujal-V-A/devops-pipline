@@ -95,9 +95,36 @@ export default function PipelineVisualizer() {
   const currentSelectedStage = stages.find(s => s.id === activeStageId) || stages[0];
 
   const copyCode = (code: string, fileName: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedFileName(fileName);
-    setTimeout(() => setCopiedFileName(null), 2000);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code)
+        .then(() => {
+          setCopiedFileName(fileName);
+          setTimeout(() => setCopiedFileName(null), 2000);
+        })
+        .catch(() => {
+          fallbackCopy(code, fileName);
+        });
+    } else {
+      fallbackCopy(code, fileName);
+    }
+  };
+
+  const fallbackCopy = (text: string, label: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-99999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      setCopiedFileName(label);
+      setTimeout(() => setCopiedFileName(null), 2000);
+    } catch (err) {
+      console.error("Fallback copy failed", err);
+    }
+    document.body.removeChild(textArea);
   };
 
   return (
