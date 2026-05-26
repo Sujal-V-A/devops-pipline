@@ -8,7 +8,7 @@ export default function ConfigGenerator() {
   const [projectName, setProjectName] = useState("hybrid-cd-pipeline");
   const [framework, setFramework] = useState<Framework>("NodeJS");
   const [dbType, setDbType] = useState<DatabaseType>("PostgreSQL");
-  const [productionIp, setProductionIp] = useState("18.232.40.101");
+  const [productionIp, setProductionIp] = useState("44.200.59.243");
   const [hostPort, setHostPort] = useState("80");
   const [copiedName, setCopiedName] = useState<string | null>(null);
 
